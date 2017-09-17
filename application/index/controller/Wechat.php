@@ -24,8 +24,8 @@ class Wechat extends Controller {
         $options = Config::get('weixin_mp');
         $this->app = new Application($options);
 
-        $weixinUser = Session::get('wechat_user');
-        // δ��¼
+        $weixinUser = Session::get('user_id');
+        // 未登录
         if (empty($weixinUser)) {
             $targetUrl = Request::instance()->url(true);
             Session::set('target_url', $targetUrl);

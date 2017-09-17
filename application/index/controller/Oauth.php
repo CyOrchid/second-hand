@@ -7,11 +7,10 @@
  */
 namespace app\index\controller;
 
+use app\index\model\User;
 use EasyWeChat\Foundation\Application;
-use think\Controller;
 use think\Session;
 use think\Config;
-use think\Request;
 
 class Oauth extends Wechat {
 
@@ -31,15 +30,38 @@ class Oauth extends Wechat {
          $this->app = new Application($options);
 
          $oauth = $this->app->oauth;
-         // ��ȡ OAuth ��Ȩ����û���Ϣ
+         // 获取 OAuth 授权结果用户信息
          $user = $oauth->user();
+         $openid = $user->getId();
 
-         Session::set('wechat_user',$user->toArray());
+         $userInfo = User::get(['openid' => $openid]);
+
+         if(empty($userInfo)) {
+             $nickName = trim($user->getNickname());
+             if($nickName) {
+                 //如果返回了基本信息，则记录到数据库
+                 $data = $user->getOriginal();
+                 //$data = json_encode($user->getOriginal());
+                 $userModel = new User($data);
+                 $userModel->save();
+                 Session::set('user_id', $userModel->id);
+
+             } else {
+                 Config::load('config.php');
+                 $options = Config::get('weixin_mp');
+                 $options['oauth']['scopes'] = ['snsapi_userinfo'];
+                 $this->app = new Application($options);
+                 $this->app->oauth->redirect()->send();
+             }
+         }
+
+         //Session::set('user_openid',$openid);
+         Session::set('user_id', $userInfo['id']);
 
          $targetUrl = Session::get('target_url');
          $targetUrl = empty($targetUrl) ? '/' : $targetUrl;
-         var_dump($targetUrl);
-         //header('location:'.$targetUrl);// ��ת�� chenyang/public/index/index/scan
+
+         // 跳转到 访问来源地址
          $this->redirect($targetUrl);
      }
 }

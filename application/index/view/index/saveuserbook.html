@@ -1,0 +1,37 @@
+{include file="public/header" /}
+</head>
+<body>
+<div class="jumbotron">
+    <h1>Sorry, That's Unsuccessful!</h1>
+
+    <form id="saveUserBook" method="post" class="form-horizontal" action="{:url('Index/saveUserBook')}">
+        <div>
+            {volist name="false_bookInfo" id="vo" }
+            <div class="media">
+                <div class="media-left media-middle">
+                    <a href="#">
+                        <img class="media-objec" style="width: 150px" src="/second-hand/public/download/bookPic/{$vo['isbn']}.jpg" alt="">
+                    </a>
+                </div>
+                <div class="media-body">
+                    <h4 class="media-heading">{$vo['title']}</h4>
+                    <input type="hidden" name="book_id[]" value="{$vo['id']}">
+                    <span>作者：{$vo['author']}</span>
+                    <span>出版社：{$vo['press']}</span>
+                    <span>价格：{$vo['price']}</span>
+
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox"> Check me out
+                        </label>
+                    </div>
+                </div>
+            </div>
+            {/volist}
+
+        </div>
+        <button type="submit" id="submit" class="btn btn-default">Submit</button>
+    </form>
+</div>
+</body>
+</html>

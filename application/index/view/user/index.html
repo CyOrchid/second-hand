@@ -1,0 +1,54 @@
+{include file="public/header" /}
+<link href="/second-hand/public/static/css/my.css" rel="stylesheet">
+
+</head>
+<body>
+<div class="weui_tab">
+    <div class="weui_tab_bd">
+        <div class="infoDiv">
+            <!-- <div id="bgS"></div> -->
+            <div id="bgG" class="blur"></div>
+            <!-- ablumBanner -->
+            <img id="mask" />
+            <!-- ablumBannerMask -->
+            <div class="infoContainer">
+                <img class="pic" src="{$userInfo.headimgurl}"/>
+                <div class="sex" >
+                    <img src="__ROOT__/static/images/sex{$userInfo.sex}.png"/>
+                </div>
+
+                <div class="name">{$userInfo.nickname}</div>
+                <div class="location"><img src="__ROOT__/static/images/location.png"/><span>{$userInfo.province} {$userInfo.city}</span></div>
+            </div>
+        </div>
+        <div>
+            {volist name="bookInfo" id="vo" }
+            <div class="media">
+                <div class="media-left media-middle">
+                    <a href="#">
+                        <img class="media-objec" style="width: 100px" src="/second-hand/public/download/bookPic/{$vo['isbn']}.jpg" alt="">
+                    </a>
+                </div>
+                <div class="media-body">
+                    <h4 class="media-heading">{$vo['title']}</h4>
+                    <input type="hidden" name="book_id[]" value="{$vo['id']}">
+                    <div>作者：{$vo['author']}</div>
+                    <div>出版社：{$vo['press']}</div>
+                    <div>价格：{$vo['price']}</div>
+
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox"> Check me out
+                        </label>
+                    </div>
+                </div>
+            </div>
+            {/volist}
+
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

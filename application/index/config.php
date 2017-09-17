@@ -17,8 +17,8 @@ return  [
             'file'  => '/tmp/easywechat.log', // XXX: 绝对路径！！！！
         ],
         'oauth' => [
-            'scopes'   => ['snsapi_userinfo'],
-            'callback' => '/chenyang/public/index/oauth',
+            'scopes'   => ['snsapi_base'],
+            'callback' => '/second-hand/public/index/oauth',
         ]
     ],
 
