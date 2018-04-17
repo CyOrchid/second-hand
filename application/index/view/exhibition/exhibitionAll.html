@@ -11,7 +11,7 @@
     </div>
     <ul id="btnList">
         <li>
-            <input value="美食数据" type="button" data-path="http://www.quwanba.tv/second-hand/public/index/exhibition/getAllBook" />
+            <input value="美食数据" type="button" data-path="http://localhost/second-hand/public/index/exhibition/getAllBook" />
         </li>
         <li>
             <input value="酒店数据" type="button" data-path="//a.amap.com/amap-ui/static/data/hotel.json" />
@@ -112,10 +112,10 @@
                         '        <%- label %>. <%- data.icon %>' +
                         '    </h3>' +
                         '    <div class="poi-info">' +
-                        '        <span class="poi-price">' +
-                        '            <%= data.price %>' +
+                        '        <a href="connection.html?isbn=qqq&userId=56">' +
+                        '            <%= data.icon %>' +
                         '        </span>' +
-                        '        <p class="poi-addr"><%- data.address %></p>' +
+                        '        <p class="poi-addr"><%- data.icon %></p>' +
                         '    </div>' +
                         '</div>' +
                         '<div class="clear"></div>', {
@@ -197,6 +197,11 @@
                         record.marker.setIconStyle(defaultIconStyle);
                     }
                 }
+            });
+
+            markerList.on('listElementClick', function(event, record) {
+
+                alert(record.data.icon);
             });
 
             //数据输出完成

@@ -29,17 +29,22 @@ class Analysis extends Controller {
         $user_id = Session::get('user_id');
         $location['user_id'] = $user_id;
 
-        //定位信息写入数据库
-        $userLocationModel = new UserLocation($location);
-        $result = $userLocationModel->save();
+        $location_id = Session::get('user_location_id');
+        if(empty($location_id)) {
+            //定位信息写入数据库
+            $userLocationModel = new UserLocation($location);
+            $result = $userLocationModel->save();
 
-        if($result) {
-            $user_location_id = $userLocationModel->id;
-            Session::set('user_location_id', $user_location_id);
-            return json_encode($location);
+            if($result) {
+                $user_location_id = $userLocationModel->id;
+                Session::set('user_location_id', $user_location_id);
+                return json_encode($location);
+            }else {
+                Session::set('user_location_id', null);
+                return json_encode('位置信息写入失败！');
+            }
         }else {
-            Session::set('user_location_id', null);
-            return json_encode('位置信息写入失败！');
+            return json_encode('已成功获取定位信息!');
         }
     }
 
@@ -60,10 +65,13 @@ class Analysis extends Controller {
             if (empty($book_id)) {
 
                 $bookInfo = $this->books($isbn);
-                if(empty($bookInfo))
-                    return '解析错误，请重新扫码！';
-
-                return json_encode($this->getCookie());
+                     if ($bookInfo == 0) {
+                         return '0'; //解析失败，请重新扫码
+                     } elseif ($bookInfo == 1) {
+                         return '1'; //未收录
+                     } else {
+                         return json_encode($this->getCookie());
+                     }
 
             }else {
 
@@ -74,15 +82,21 @@ class Analysis extends Controller {
 
         }
 
-        return '抱歉，暂不支持非图书类扫码！';
+        return '2'; //抱歉，暂不支持非图书类扫码！
     }
 
     public function books($isbn) {
-
         $douban_url = "https://book.douban.com/isbn/".$isbn;
-
-        $bookInfo = [];
-
+        $exception = '0';
+        $contents = null;
+        try {
+            $contents = file_get_contents($douban_url);
+        } catch (\Exception $e) {
+            $exception =  '1'; //未收录
+        }
+        if ($exception) {
+            return $exception;
+        }
 /*      //通过正则表达式从网页中解析图书相关信息
         $contents = file_get_contents($douban_url);
 
@@ -128,16 +142,12 @@ class Analysis extends Controller {
         }*/
         //引入用于解析HTML标签的类库
         Loader::import('simple_html_dom',EXTEND_PATH);
-        $html = str_get_html(file_get_contents($douban_url));
-        if(empty($html)) {
-            $this->error('抱歉，该书尚未收录，请手动添加！');
-        }
+
+        $html = str_get_html($contents);
+        $bookInfo = [];
         //书名
         $bookInfo['title'] = $html->find("#wrapper h1 span")[0]->plaintext;
-        //获取封面图片并保存到服务器
-        $img = $html->find("#mainpic img")[0]->src;
-        $img = file_get_contents($img);
-        file_put_contents(ROOT_PATH . 'public' . DS . 'download' . DS . 'bookPic' . DS .$isbn.'.jpg', $img);
+
         //获取图书信息（作者、出版社等）
         $infoString = $html->find('#info')[0]->plaintext;
         $infoString = str_replace(" ","",$infoString);
@@ -192,13 +202,24 @@ class Analysis extends Controller {
         $tagString =str_replace(" ","",$tagString);
         $tagArray = explode("&nbsp;",$tagString);
 
+        //获取封面图片并保存到服务器
+        $img = $html->find("#mainpic img")[0]->src;
+
+        //引入用压缩图片的类库
+        Loader::import('image_compress',EXTEND_PATH);
+        $path = ROOT_PATH . 'public' . DS . 'download' . DS . 'bookPic' . DS . 'map' . DS .$bookInfo['isbn'].'.jpg';
+        (new \imgcompress($img,26))->compressImg($path);
+
+        $img = file_get_contents($img);
+        file_put_contents(ROOT_PATH . 'public' . DS . 'download' . DS . 'bookPic' . DS .$bookInfo['isbn'].'.jpg', $img);
+
         //把图书信息保存到数据库
          $result = $this->saveBookinfo($bookInfo, $tagArray);
          if ($result) {
              //图书信息写入成功，则返回图书信息
              return $bookInfo;
          }
-         return null;
+         return $exception; //解析失败
     }
 
     public function saveBookinfo($bookInfo, $tagArray) {
@@ -207,7 +228,7 @@ class Analysis extends Controller {
         $result = $bookModel->save();
         if($result) {
             $book_id = $bookModel->id;
-
+            $bookInfo['id'] = $book_id;
             Cookie::set($book_id, $bookInfo, 600);
             Db::name('book_tag')->insert(['book_id' => $book_id, 'tag' => json_encode($tagArray)]);
 
@@ -221,7 +242,7 @@ class Analysis extends Controller {
         $bookInfo = [];
 
         foreach ($book_cookie as $item => $value) {
-            if (trim($item) == "PHPSESSID") continue;
+            if (trim($item) == "PHPSESSID" || trim($item) == "thinkphp_show_page_trace") continue;
             $bookInfo[$item] = Cookie::get($item);
         }
         return $bookInfo;

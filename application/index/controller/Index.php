@@ -20,18 +20,11 @@ class Index extends Wechat {
 
     public function index()
     {
-        $location = Session::get('user_location_id');
-
         Config::load('config.php');
         $options = Config::get('weixin_mp');
         $this->app = new Application($options);
 
         $js = $this->app->js;
-        if(empty($location)) {
-            $this->assign('location',0);
-        }else {
-            $this->assign('location',1);
-        }
         $js = $js->config(array('scanQRCode','getLocation'),false,false,false);
 
         $this->assign('config',$js);
@@ -41,7 +34,6 @@ class Index extends Wechat {
         $bookInfo = $getCookie->getCookie();
 
         $this->assign('bookInfo', $bookInfo);
-
         return $this->fetch();
     }
 

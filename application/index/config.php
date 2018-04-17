@@ -8,8 +8,8 @@
 return  [
     'weixin_mp' => [
         'debug'  => true,
-        'app_id' => 'wx415910006d55188d',
-        'secret' => 'c4d6eb9609dc479eb6708d9c5ab9d409',
+        'app_id' => 'wx0e0ce194492cb77e',
+        'secret' => 'b70c3087e36f87556fa7241080441ea2',
         'token'  => 'findlab',
         // 'aes_key' => null, // 可选
         'log' => [

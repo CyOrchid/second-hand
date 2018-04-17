@@ -21,7 +21,7 @@
     map.clearMap();  // 清除地图覆盖物
 
     $(document).ready(function(){
-        $.get("http://www.quwanba.tv/second-hand/public/index/exhibition/getAllBook", function(data) {
+        $.get("http://localhost/second-hand/public/index/exhibition/getAllBook", function(data) {
             // 添加一些分布不均的点到地图上,地图上添加三个点标记，作为参照
             data.forEach(function(marker) {
 
