@@ -1,0 +1,44 @@
+{include file="public/header" /}
+<script src="http://webapi.amap.com/maps?v=1.4.3&key=99cb0bff783bd1793a136878b1d4c41b"></script>
+<link rel="stylesheet" href="http://cache.amap.com/lbs/static/main1119.css"/>
+</head>
+<body>
+<div id="container" ></div>
+<div class="button-group">
+    <input id="setFitView" class="button" type="button" value="地图自适应显示"/>
+</div>
+</body>
+<script type="text/javascript" src='//webapi.amap.com/maps?v=1.4.3&key=99cb0bff783bd1793a136878b1d4c41b'></script>
+<script src="//webapi.amap.com/ui/1.0/main.js?v=1.0.11"></script>
+<script>
+    var longitude = '{$location.longitude}';
+    var latitude = '{$location.latitude}';
+    var map = new AMap.Map('container', {
+        resizeEnable: true,
+        center: [longitude, latitude],
+        zoom: 13
+    });
+    map.clearMap();  // 清除地图覆盖物
+
+    $(document).ready(function(){
+        $.get("http://www.quwanba.tv/second-hand/public/index/exhibition/getAllBook", function(data) {
+            // 添加一些分布不均的点到地图上,地图上添加三个点标记，作为参照
+            data.forEach(function(marker) {
+
+                new AMap.Marker({
+                    map: map,
+                    icon: marker.icon,
+                    position: [marker.longitude, marker.latitude],
+                    offset: new AMap.Pixel(-12, -36)
+                });
+            });
+        });
+    });
+    // 添加事件监听, 使地图自适应显示到合适的范围
+    AMap.event.addDomListener(document.getElementById('setFitView'), 'click', function() {
+        var newCenter = map.setFitView();
+    });
+
+</script>
+
+</html>
