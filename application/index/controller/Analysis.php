@@ -242,7 +242,10 @@ class Analysis extends Controller {
         $bookInfo = [];
 
         foreach ($book_cookie as $item => $value) {
-            if (trim($item) == "PHPSESSID" || trim($item) == "thinkphp_show_page_trace") continue;
+            // 仅处理以数字ID命名的图书cookie，避免暴露无关cookie
+            if (!preg_match('/^\\d+$/', (string)$item)) {
+                continue;
+            }
             $bookInfo[$item] = Cookie::get($item);
         }
         return $bookInfo;
