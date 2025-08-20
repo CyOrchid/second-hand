@@ -53,10 +53,11 @@ class Oauth extends Wechat {
                  $this->app = new Application($options);
                  $this->app->oauth->redirect()->send();
              }
+         } else {
+             // 已存在用户，直接设置会话
+             //Session::set('user_openid',$openid);
+             Session::set('user_id', $userInfo['id']);
          }
-
-         //Session::set('user_openid',$openid);
-         Session::set('user_id', $userInfo['id']);
 
          $targetUrl = Session::get('target_url');
          $targetUrl = empty($targetUrl) ? '/' : $targetUrl;

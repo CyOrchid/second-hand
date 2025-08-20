@@ -40,30 +40,33 @@ class Index extends Wechat {
 
     public function saveUserBook(Request $request) {
 
-        $data = $request->param();
+        // 仅提取书籍ID数组，避免遍历所有参数导致错误
+        $bookIds = $request->param('book_id/a', []);
 
         $user_id = Session::get('user_id');
         $user_location_id = Session::get('user_location_id');
 
-        $user_book = [];
-        $user_book['user_id'] = $user_id;
-        $user_book['user_location_id'] = $user_location_id;
+        if (empty($user_id) || empty($user_location_id)) {
+            $this->redirect('index/index/index');
+        }
 
-        $userbookModel = new UserBook($user_book);
-        foreach ($data as $value) {
-            foreach ($value as $book_id) {
-                $user_book['book_id'] = $book_id;
-                $result = $userbookModel->data($user_book,true)->isUpdate(false)->save();
-                if($result) {
-                     Cookie::delete($book_id);
-                }else{
-                    $falseId[] = $book_id;
-                }
+        $falseId = [];
+        $userbookModel = new UserBook();
+        foreach ($bookIds as $book_id) {
+            $user_book = [];
+            $user_book['user_id'] = $user_id;
+            $user_book['user_location_id'] = $user_location_id;
+            $user_book['book_id'] = $book_id;
+            $result = $userbookModel->isUpdate(false)->save($user_book);
+            if($result) {
+                Cookie::delete($book_id);
+            } else {
+                $falseId[] = $book_id;
             }
         }
         if (empty($falseId)) {
             $this->redirect('index/user/index');
-        }else {
+        } else {
             $false_bookInfo = new Analysis();
             $false_bookInfo = $false_bookInfo->getCookie();
             $this->assign('false_bookInfo', $false_bookInfo);
